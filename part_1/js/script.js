@@ -1,63 +1,78 @@
 'use strict';
-
-//theme
-const ThemeValues  = {
-  LIGHT: 'light',
-  DARK: 'dark',
-  TEXTURE: 'texture',
-}
-
-const buttonThemeLight = document.querySelector('.theme-button-light');
-const buttonThemeDark = document.querySelector('.theme-button-dark');
-const buttonThemeTexture = document.querySelector('.theme-button-texture');
-
-const buttonThemeLightHandler = () => {
-  document.documentElement.dataset['themeName'] = ThemeValues.LIGHT;
-}
-
-const buttonThemeDarkHandler = () => {
-  document.documentElement.dataset['themeName'] = ThemeValues.DARK;
-}
-
-const buttonThemeTextureHandler = () => {
-  document.documentElement.dataset['themeName'] = ThemeValues.TEXTURE;
-}
-
-//card view
-const buttonCardViewTile = document.querySelector('.card-view-button-tile');
-const buttonCardViewStandard = document.querySelector('.card-view-button-standart');
-const buttonCardViewCompact = document.querySelector('.card-view-button-compact');
-
-const courses = document.querySelector('.cards');
-const cardViewButtonsList = document.querySelector('.card-view-buttons');
-
-const buttonCardViewTileHandler = () => {
-  debugger
-  courses.classList.remove('standard');
-  courses.classList.remove('compact');
-  courses.classList.add('tile');
+const ACTIVE_CLASS = 'active';
+const SettingType = {
+  ATTRIBUTE: 'attribute',
+  CLASS: 'class',
 };
 
-const buttonCardViewStandardHandler = () => {
-  courses.classList.remove('tile');
-  courses.classList.remove('compact');
-  courses.classList.add('standard');
-};
+window.addEventListener('load', () => {
 
-const buttonCardViewCompactHandler = () => {
-  courses.classList.remove('tile');
-  courses.classList.remove('standard');
-  courses.classList.add('compact');
-};
+  const containers = document.querySelectorAll('.js-buttons-container');
+  
 
-const init = () => {
-  buttonThemeLight.addEventListener('click', buttonThemeLightHandler);
-  buttonThemeDark.addEventListener('click', buttonThemeDarkHandler);
-  buttonThemeTexture.addEventListener('click', buttonThemeTextureHandler);
+  const setDataAttribute = ({settingTarget}, params) => {
+    //data-setting-target=":root" 
+    //data-setting-type="attribute"
+    const element = document.querySelector(settingTarget);
+    for (const [key, value] of Object.entries(params)) {
+      element.dataset[key] = value;
+    }
+  }
 
-  buttonCardViewTile.addEventListener('click', buttonCardViewTileHandler);
-  buttonCardViewStandard.addEventListener('click', buttonCardViewStandardHandler);
-  buttonCardViewCompact.addEventListener('click', buttonCardViewCompactHandler);
-}
+  const setClass = ({settingTarget}, params) => {
+    //data-setting-target=".cards" 
+    //data-setting-type="class"
+    const element = document.querySelector(settingTarget);
+    const settingButtons = document.querySelectorAll('[data-setting-name]');
 
-init();
+
+    for (const [key, value] of Object.entries(params)) {
+      const elements = Array
+      .from(settingButtons)
+      .filter((element) => element.dataset['settingName'] === key);
+      // удалить классы, название которых совпадает со значением атрибута setting-value всех элементов с setting-name равным key
+      elements.forEach((item) => {
+        element.classList.remove(item.dataset.settingValue);
+      });
+      element.classList.add(value);
+    }
+  }
+
+  const setButtonActive = () => {
+
+  }
+
+  const applySetting = (setting, params) => {
+    debugger
+    switch(setting.settingType) {
+      case SettingType.CLASS:
+        setClass(setting, params);
+      case SettingType.ATTRIBUTE:
+        setDataAttribute(setting, params);
+    }
+  }
+
+  const settingButtonClickHandler = (evt, setting) => {
+    const button = evt.target.closest('button');
+    if (!button) {
+      return;
+    }
+
+    const params = {}
+    const { settingName, settingValue } = button.dataset;
+    params[settingName] = settingValue;
+
+    applySetting(setting, params);
+  }
+
+  const init = () => {
+    containers.forEach((container) => {
+      const setting = container.dataset;
+      container.addEventListener('click', (evt) => {
+        settingButtonClickHandler(evt, setting);
+      });
+    })
+  }
+
+  init();
+});
