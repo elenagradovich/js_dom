@@ -8,7 +8,7 @@ const SettingType = {
 window.addEventListener('load', () => {
 
   const containers = document.querySelectorAll('.js-buttons-container');
-  
+  const settingButtons = document.querySelectorAll('[data-setting-name]');
 
   const setDataAttribute = ({settingTarget}, params) => {
     //data-setting-target=":root" 
@@ -23,12 +23,10 @@ window.addEventListener('load', () => {
     //data-setting-target=".cards" 
     //data-setting-type="class"
     const element = document.querySelector(settingTarget);
-    const settingButtons = document.querySelectorAll('[data-setting-name]');
 
 
     for (const [key, value] of Object.entries(params)) {
-      const elements = Array
-      .from(settingButtons)
+      const elements = Array.from(settingButtons)
       .filter((element) => element.dataset['settingName'] === key);
       // удалить классы, название которых совпадает со значением атрибута setting-value всех элементов с setting-name равным key
       elements.forEach((item) => {
@@ -38,18 +36,33 @@ window.addEventListener('load', () => {
     }
   }
 
-  const setButtonActive = () => {
+  const setButtonActive = (params) => {
+    for (const [key, value] of Object.entries(params)) {
+      // находим активную кнопку для настройки
+      const activeButton = Array.from(settingButtons)
+        .find((element) => element.dataset['settingName'] === key && element.classList.contains('active'));
+      debugger
+      // снимаем класс active с кнопки, которая ранее была активной
+      activeButton.classList.remove('active');
 
-  }
+      // находим кнопку, которую устанавливаем для настройки
+      const newActiveButton = Array.from(settingButtons)
+      .find((element) => element.dataset['settingName'] === key && element.dataset['settingValue'] === value);
+
+      // добавляем класс active с кнопки, которую устанавливаем
+      newActiveButton.classList.add('active');
+    }
+  };
 
   const applySetting = (setting, params) => {
-    debugger
     switch(setting.settingType) {
       case SettingType.CLASS:
         setClass(setting, params);
       case SettingType.ATTRIBUTE:
         setDataAttribute(setting, params);
     }
+
+    setButtonActive(params);
   }
 
   const settingButtonClickHandler = (evt, setting) => {
